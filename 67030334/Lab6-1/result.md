@@ -1,7 +1,7 @@
-#idf.py size#
+# idf.py size
 ![alt text](image.png)
 
-#idf.py size-components
+# idf.py size-components
 ''''
 Executing action: size-components
 Running ninja in directory /project/lab6_1_basic_build/build
@@ -50,7 +50,7 @@ Executing "ninja size-components"...
 │ libesp_phy.a            │          5 │    0 │    0 │     0 │    0 │     0 │        0 │          5 │     5 │          0 │       0 │        0 │        0 │                  0 │           0 │
 └─────────────────────────┴────────────┴──────┴──────┴───────┴──────┴───────┴──────────┴────────────┴───────┴────────────┴─────────┴──────────┴──────────┴────────────────────┴─────────────┘
 ,,,,
-#idf.py size-files
+# idf.py size-files
 Executing action: size-files
 Running ninja in directory /project/lab6_1_basic_build/build
 Executing "ninja all"...
