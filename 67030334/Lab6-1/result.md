@@ -2,8 +2,8 @@
 ![alt text](image.png)
 
 # idf.py size-components
-''''
-Executing action: size-components
+```
+ Executing action: size-components
 Running ninja in directory /project/lab6_1_basic_build/build
 Executing "ninja all"...
 [1/4] cd /project/lab6_1_basic_build/build &...6_1_basic_build/build/lab6_1_basic_build.bin
@@ -49,9 +49,10 @@ Executing "ninja size-components"...
 │ libnvs_sec_provider.a   │          5 │    0 │    0 │     0 │    0 │     0 │        0 │          5 │     5 │          0 │       0 │        0 │        0 │                  0 │           0 │
 │ libesp_phy.a            │          5 │    0 │    0 │     0 │    0 │     0 │        0 │          5 │     5 │          0 │       0 │        0 │        0 │                  0 │           0 │
 └─────────────────────────┴────────────┴──────┴──────┴───────┴──────┴───────┴──────────┴────────────┴───────┴────────────┴─────────┴──────────┴──────────┴────────────────────┴─────────────┘
-,,,,
+```
 # idf.py size-files
-Executing action: size-files
+```
+ Executing action: size-files
 Running ninja in directory /project/lab6_1_basic_build/build
 Executing "ninja all"...
 [1/4] cd /project/lab6_1_basic_build/b...sic_build/build/lab6_1_basic_build.bin
@@ -263,9 +264,9 @@ Executing "ninja size-files"...
 │ log_write.c.obj                     │          4 │    4 │    0 │     4 │    0 │     0 │        0 │          0 │     0 │          0 │       0 │        0 │        0 │                  0 │           0 │
 │ spi_bus_lock.c.obj                  │          4 │    0 │    0 │     0 │    0 │     0 │        0 │          0 │     0 │          4 │       4 │        0 │        0 │                  0 │           0 │
 └─────────────────────────────────────┴────────────┴──────┴──────┴───────┴──────┴───────┴──────────┴────────────┴───────┴────────────┴─────────┴──────────┴──────────┴────────────────────┴─────────────┘
-
+```
 #การทอลองเพิ่มเติม
-![alt text](image-1.png)
+<img width="1052" height="982" alt="image" src="https://github.com/user-attachments/assets/d8464512-940a-4345-866a-19081b0925cc" />
 
 #คำถามทบทวน
 
