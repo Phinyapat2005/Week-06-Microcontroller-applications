@@ -265,15 +265,78 @@ Executing "ninja size-files"...
 │ spi_bus_lock.c.obj                  │          4 │    0 │    0 │     0 │    0 │     0 │        0 │          0 │     0 │          4 │       4 │        0 │        0 │                  0 │           0 │
 └─────────────────────────────────────┴────────────┴──────┴──────┴───────┴──────┴───────┴──────────┴────────────┴───────┴────────────┴─────────┴──────────┴──────────┴────────────────────┴─────────────┘
 ```
-#การทอลองเพิ่มเติม
+# การทอลองเพิ่มเติม
 <img width="1052" height="982" alt="image" src="https://github.com/user-attachments/assets/d8464512-940a-4345-866a-19081b0925cc" />
 
-#คำถามทบทวน
+# คำถามทบทวน
 
-1.Docker vs Native Setup: อธิบายข้อดีของการใช้ Docker เปรียบเทียบกับการติดตั้ง ESP-IDF บน host system
-2.Build Process: อธิบายขั้นตอนการ build ของ ESP-IDF ใน Docker container ตั้งแต่ source code จนได้ binary
-3.CMake Files: บทบาทของไฟล์ CMakeLists.txt แต่ละไฟล์คืออะไร และทำงานอย่างไรใน Docker environment?
-4.Git Ignore: ไฟล์ .gitignore มีความสำคัญอย่างไรสำหรับ ESP32 project development?
-5.Container Persistence: ข้อมูลใดบ้างที่จะหายไปเมื่อ restart container และข้อมูลใดที่จะอยู่ต่อ?
-6.Development Workflow: เปรียบเทียบ workflow การพัฒนาระหว่างการใช้ Docker กับการทำงานบน native system
-
+ ## 1.Docker vs Native Setup: อธิบายข้อดีของการใช้ Docker เปรียบเทียบกับการติดตั้ง ESP-IDF บน host system
+ ```| หัวข้อ                                       | **Docker Setup**                                                                        | **Native Setup**                                                                 |
+| -------------------------------------------- | --------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| **ความสะดวกในการติดตั้ง**                    | ไม่ต้องติดตั้ง toolchain, Python, CMake, Ninja, ESP-IDF เอง — ทุกอย่างอยู่ใน image แล้ว | ต้องติดตั้งทุกเครื่องมือบนเครื่อง host ซึ่งอาจใช้เวลานานและมี dependency ซับซ้อน |
+| **ความสม่ำเสมอของสภาพแวดล้อม (Consistency)** | ได้ environment เดียวกันทุกเครื่อง — เหมาะกับทีมพัฒนา                                   | ต่างเครื่องกันอาจมี version mismatch (Python, compiler, IDF version)             |
+| **ความปลอดภัยของระบบหลัก**                   | ทุกอย่างทำใน container แยกจากระบบหลัก ปลอดภัยกว่า                                       | เครื่อง host เสี่ยงหากติดตั้งผิดหรือต้องแก้ไข dependency                         |
+| **ประสิทธิภาพ**                              | อาจช้ากว่าเล็กน้อย (เพราะรันผ่าน container layer)                                       | ทำงานเร็วกว่าเล็กน้อย เพราะรันโดยตรงบน host                                      |
+| **การย้ายเครื่อง (Portability)**             | ย้ายง่าย แค่ใช้ `docker-compose.yml` เดิมก็ได้ environment เดิมทันที                    | ต้องติดตั้งใหม่ทั้งหมดบนเครื่องใหม่                                              |
+```
+## 2.Build Process: อธิบายขั้นตอนการ build ของ ESP-IDF ใน Docker container ตั้งแต่ source code จนได้ binary
+```ลำดับขั้นตอนของการ build ESP-IDF project ภายใน Docker:
+Source Code Mount:
+โฟลเดอร์โปรเจ็กต์จาก host (เช่น ./lab6_1_basic_build) ถูก mount เข้า container ผ่าน docker-compose.yml
+→ /project ภายใน container จะชี้ไปยังโฟลเดอร์จริงของ host
+Set Target:
+idf.py set-target esp32
+กำหนด target MCU และสร้าง sdkconfig ที่เหมาะสม
+Configure & Generate Build System:
+CMake จะอ่าน CMakeLists.txt (ทั้งของโปรเจ็กต์และ components) เพื่อสร้าง build tree ใน build/
+Build Compilation:
+คำสั่ง idf.py build จะเรียก Ninja/CMake compile source code ทั้งหมด → .o → .elf
+Binary Generation:
+จาก .elf จะถูกแปลงเป็น .bin (เช่น project_name.bin, bootloader.bin, partition_table.bin)
+Output Artifacts:
+ไฟล์ทั้งหมดอยู่ใน /project/build/ ซึ่ง sync กลับไปยัง host
+```
+## 3.CMake Files: บทบาทของไฟล์ CMakeLists.txt แต่ละไฟล์คืออะไร และทำงานอย่างไรใน Docker environment?
+```
+| ไฟล์                               | บทบาท                                                                                      |
+| ---------------------------------- | ------------------------------------------------------------------------------------------ |
+| **CMakeLists.txt (root project)**  | ระบุ project name, target, main directory, และ dependencies หลักของโปรเจ็กต์               |
+| **CMakeLists.txt (ใน components)** | ระบุ source files และ include directories ของ component นั้น เช่น `sensor`, `wifi`, `uart` |
+| **ESP-IDF built-in CMake files**   | อยู่ใน path `/opt/esp/idf/tools/cmake/` ทำหน้าที่จัดการ build system ทั้งหมด               |
+```
+## 4.Git Ignore: ไฟล์ .gitignore มีความสำคัญอย่างไรสำหรับ ESP32 project development?
+```
+ไฟล์ .gitignore ใช้เพื่อ บอก Git ว่าไฟล์หรือโฟลเดอร์ใดไม่ควรถูก commit เช่น
+# ESP-IDF build output
+build/
+sdkconfig.old
+*.bin
+*.elf
+*.map
+__pycache__/
+ความสำคัญ:
+ลดขนาด repository
+ป้องกันการ commit ไฟล์ขยะ (temporary files, binary)
+ให้ repo สะอาดและ clone ได้เร็ว
+สำหรับ ESP-IDF: ไม่ควร commit โฟลเดอร์ build/ หรือไฟล์ .bin เพราะจะ generate ใหม่ทุกครั้ง
+```
+## 5.Container Persistence: ข้อมูลใดบ้างที่จะหายไปเมื่อ restart container และข้อมูลใดที่จะอยู่ต่อ?
+```| ประเภทข้อมูล                           | อยู่ต่อหลัง restart? | หมายเหตุ                                          |
+| -------------------------------------- | -------------------- | ------------------------------------------------- |
+| **Source code (mount จาก host)**       | ✅ อยู่ต่อ            | เพราะเก็บบน host                                  |
+| **Build files ใน `/project/build`**    | ✅ อยู่ต่อ            | ถ้า mount กลับ host                               |
+| **Package/Dependency ใน container**    | ❌ หายหมด             | เพราะ container ใหม่จะเริ่มจาก image เดิมทุกครั้ง |
+| **Environment variables ใน container** | ❌ หายหมด             | ต้องกำหนดใน `docker-compose.yml`                  |
+| **Log files ภายใน container**          | ❌ หายหมด             | ถ้าไม่ได้ mount volume                            |
+```
+## 6.Development Workflow: เปรียบเทียบ workflow การพัฒนาระหว่างการใช้ Docker กับการทำงานบน native system
+```
+| ขั้นตอน                        | **Docker Workflow**                                   | **Native Workflow**                    |
+| ------------------------------ | ----------------------------------------------------- | -------------------------------------- |
+| **Setup**                      | `docker-compose up -d` สร้าง container พร้อมใช้       | ต้องติดตั้ง ESP-IDF, toolchain เอง     |
+| **Build**                      | `docker-compose exec esp32-dev idf.py build`          | รัน `idf.py build` โดยตรง              |
+| **Run / Flash**                | ผ่าน container เช่น `idf.py flash` หรือ `idf.py qemu` | ผ่าน USB port ของ host โดยตรง          |
+| **Clean / Reset**              | สั่ง `docker-compose down && up` เพื่อเริ่มใหม่       | ใช้ `idf.py fullclean`                 |
+| **CI/CD Integration**          | ใช้ image เดียวกับ local build บน GitHub Actions ได้  | ต้องตั้ง environment บนแต่ละเครื่องเอง |
+| **ความสะดวกในการแชร์โปรเจกต์** | สูงมาก แค่ส่ง `docker-compose.yml` กับ source code    | ต้องแนบเอกสารสอนติดตั้งเครื่องมือเพิ่ม |
+```
