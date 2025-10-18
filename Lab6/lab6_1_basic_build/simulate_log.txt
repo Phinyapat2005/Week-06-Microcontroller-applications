@@ -246,3 +246,9 @@ I (145331) LAB6: Running... Counter: 143
 I (146331) LAB6: Running... Counter: 144
 I (147331) LAB6: Running... Counter: 145
 I (148331) LAB6: Running... Counter: 146
+I (149331) LAB6: Running... Counter: 147
+I (150331) LAB6: Running... Counter: 148
+I (151331) LAB6: Running... Counter: 149
+I (151331) LAB6: Current free heap: 304628 bytes
+I (152331) LAB6: Running... Counter: 150
+I (153331) LAB6: Running... Counter: 151
